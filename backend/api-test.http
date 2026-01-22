@@ -1,0 +1,226 @@
+# File Extension Blocker API Tests
+# Install "REST Client" VS Code extension to use this file
+# Click "Send Request" above each request to execute
+
+@baseUrl = http://localhost:3001
+@userId = user_test_123456
+
+###############################################
+# 1. Health Check
+###############################################
+
+### Health Check
+GET {{baseUrl}}/health
+
+###############################################
+# 2. Fixed Extensions Tests
+###############################################
+
+### 2-1. GET Fixed Extensions (Empty - First Time)
+GET {{baseUrl}}/api/extensions/fixed?userId={{userId}}
+
+### 2-2. PUT Fixed Extensions (Save - Check exe, sh)
+PUT {{baseUrl}}/api/extensions/fixed
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "extensions": [
+    { "name": "bat", "isBlocked": false },
+    { "name": "cmd", "isBlocked": false },
+    { "name": "com", "isBlocked": false },
+    { "name": "cpl", "isBlocked": false },
+    { "name": "exe", "isBlocked": true },
+    { "name": "scr", "isBlocked": false },
+    { "name": "js", "isBlocked": true }
+  ]
+}
+
+### 2-3. GET Fixed Extensions (Should show saved state)
+GET {{baseUrl}}/api/extensions/fixed?userId={{userId}}
+
+### 2-4. PUT Fixed Extensions (Update - Check more)
+PUT {{baseUrl}}/api/extensions/fixed
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "extensions": [
+    { "name": "bat", "isBlocked": true },
+    { "name": "cmd", "isBlocked": true },
+    { "name": "com", "isBlocked": false },
+    { "name": "cpl", "isBlocked": false },
+    { "name": "exe", "isBlocked": true },
+    { "name": "scr", "isBlocked": false },
+    { "name": "js", "isBlocked": true }
+  ]
+}
+
+### 2-5. GET Fixed Extensions (Verify update)
+GET {{baseUrl}}/api/extensions/fixed?userId={{userId}}
+
+###############################################
+# 3. Custom Extensions Tests
+###############################################
+
+### 3-1. GET Custom Extensions (Empty - First Time)
+GET {{baseUrl}}/api/extensions/custom?userId={{userId}}
+
+### 3-2. POST Custom Extension (Add "zip")
+POST {{baseUrl}}/api/extensions/custom
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "name": "zip"
+}
+
+### 3-3. POST Custom Extension (Add "rar")
+POST {{baseUrl}}/api/extensions/custom
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "name": "rar"
+}
+
+### 3-4. POST Custom Extension (Add "7z")
+POST {{baseUrl}}/api/extensions/custom
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "name": "7z"
+}
+
+### 3-5. GET Custom Extensions (Should show 3 items)
+GET {{baseUrl}}/api/extensions/custom?userId={{userId}}
+
+###############################################
+# 4. Error Cases
+###############################################
+
+### 4-1. POST Duplicate Extension (Error)
+POST {{baseUrl}}/api/extensions/custom
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "name": "zip"
+}
+
+### 4-2. POST Invalid Format - Special Characters (Error)
+POST {{baseUrl}}/api/extensions/custom
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "name": "abc@#$"
+}
+
+### 4-3. POST Invalid Format - Too Long (Error)
+POST {{baseUrl}}/api/extensions/custom
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "name": "verylongextensionname123456"
+}
+
+### 4-4. POST Invalid Format - Empty (Error)
+POST {{baseUrl}}/api/extensions/custom
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "name": ""
+}
+
+### 4-5. POST Without userId (Error)
+POST {{baseUrl}}/api/extensions/custom
+Content-Type: application/json
+
+{
+  "name": "test"
+}
+
+### 4-6. GET Without userId (Error)
+GET {{baseUrl}}/api/extensions/fixed
+
+###############################################
+# 5. Delete Custom Extension
+###############################################
+
+### 5-1. DELETE Custom Extension (Replace EXTENSION_ID)
+# First, get the ID from GET Custom Extensions response above
+# Then replace "EXTENSION_ID_HERE" with actual ID
+DELETE {{baseUrl}}/api/extensions/custom/EXTENSION_ID_HERE?userId={{userId}}
+
+### 5-2. DELETE Non-existent Extension (Error)
+DELETE {{baseUrl}}/api/extensions/custom/invalid-id-12345?userId={{userId}}
+
+### 5-3. DELETE Without userId (Error)
+DELETE {{baseUrl}}/api/extensions/custom/some-id
+
+###############################################
+# 6. Normalization Tests
+###############################################
+
+### 6-1. POST with Leading Dots (Should normalize to "exe")
+POST {{baseUrl}}/api/extensions/custom
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "name": "...exe"
+}
+
+### 6-2. POST with Uppercase (Should normalize to lowercase)
+POST {{baseUrl}}/api/extensions/custom
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "name": "PDF"
+}
+
+### 6-3. POST with Spaces (Should trim)
+POST {{baseUrl}}/api/extensions/custom
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "name": "  mp4  "
+}
+
+###############################################
+# 7. Multi-User Test
+###############################################
+
+### 7-1. Different User - Add Extension
+POST {{baseUrl}}/api/extensions/custom
+Content-Type: application/json
+
+{
+  "userId": "user_another_999",
+  "name": "docx"
+}
+
+### 7-2. Different User - GET Extensions
+GET {{baseUrl}}/api/extensions/custom?userId=user_another_999
+
+### 7-3. Original User - GET Extensions (Should not see "docx")
+GET {{baseUrl}}/api/extensions/custom?userId={{userId}}
+
+###############################################
+# 8. Cleanup (Optional)
+###############################################
+
+### 8-1. Get all custom extensions to find IDs
+GET {{baseUrl}}/api/extensions/custom?userId={{userId}}
+
+### 8-2. Delete each extension one by one
+# Replace IDs from above response
+# DELETE {{baseUrl}}/api/extensions/custom/ID_1?userId={{userId}}
+# DELETE {{baseUrl}}/api/extensions/custom/ID_2?userId={{userId}}
+# DELETE {{baseUrl}}/api/extensions/custom/ID_3?userId={{userId}}
