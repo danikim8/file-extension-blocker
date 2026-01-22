@@ -12,25 +12,22 @@ const api = axios.create({
   timeout: 10000,
 })
 
-// Request Interceptor: 요청 전 로깅
+// Request Interceptor
 api.interceptors.request.use(
   (config) => {
-    console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, config.data)
     return config
   },
   (error) => {
-    console.error('[API Request Error]', error)
     return Promise.reject(error)
   }
 )
 
-// Response Interceptor: 응답 처리 및 에러 로깅
+// Response Interceptor
 api.interceptors.response.use(
   (response) => {
     return response
   },
   (error) => {
-    console.error('[API Response Error]', error.response?.data || error.message)
     return Promise.reject(error)
   }
 )

@@ -33,8 +33,7 @@ export function useExtensions() {
       })
 
       setFixedExtensions(combined)
-    } catch (error) {
-      console.error('Failed to load fixed extensions:', error)
+    } catch {
       toast.error('고정 확장자 로드 실패')
       
       // API 실패 시에도 FIXED_EXTENSIONS를 기본값으로 사용
@@ -55,8 +54,7 @@ export function useExtensions() {
 
       const list: CustomExtension[] = response.data?.data ?? []
       setCustomExtensions(list)
-    } catch (error) {
-      console.error('Failed to load custom extensions:', error)
+    } catch {
       toast.error('커스텀 확장자 로드 실패')
     }
   }
@@ -68,9 +66,8 @@ export function useExtensions() {
 
     try {
       await Promise.all([loadFixedExtensions(userId), loadCustomExtensions(userId)])
-    } catch (error) {
-      console.error('Failed to load extensions:', error)
-      // 개별 로드 함수에서 이미 토스트를 띄우므로 여기서는 로깅만
+    } catch {
+      // 개별 로드 함수에서 이미 토스트를 띄우므로 여기서는 아무것도 하지 않음
     } finally {
       setIsLoading(false)
     }
@@ -99,8 +96,7 @@ export function useExtensions() {
 
       toast.success('고정 확장자 설정이 저장되었습니다.')
       setHasUnsavedChanges(false)
-    } catch (error) {
-      console.error('Failed to save fixed extensions:', error)
+    } catch {
       toast.error('고정 확장자 저장에 실패했습니다.')
     } finally {
       setIsSavingFixed(false)
@@ -122,8 +118,7 @@ export function useExtensions() {
 
       setCustomExtensions(prev => [...prev, created])
       toast.success(`확장자 "${name}"이(가) 추가되었습니다.`)
-    } catch (error) {
-      console.error('Failed to add custom extension:', error)
+    } catch {
       toast.error('커스텀 확장자 추가에 실패했습니다.')
     } finally {
       setIsAddingCustom(false)
@@ -143,8 +138,7 @@ export function useExtensions() {
 
       setCustomExtensions(prev => prev.filter(ext => ext.id !== id))
       toast.success(`확장자 "${extensionName}"이(가) 삭제되었습니다.`)
-    } catch (error) {
-      console.error('Failed to delete custom extension:', error)
+    } catch {
       toast.error('커스텀 확장자 삭제에 실패했습니다.')
     }
   }
