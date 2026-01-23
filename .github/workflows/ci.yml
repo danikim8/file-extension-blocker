@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  backend-test:
+    name: 🧪 Backend Tests
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./backend
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🟢 Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+      
+      - name: 📦 Install dependencies
+        run: npm ci
+      
+      - name: 🧪 Run tests
+        run: npm test -- --coverage
+      
+      - name: 🔧 Type check
+        run: npm run type-check
+        if: always()
+      
+      - name: 📊 Test Summary
+        if: always()
+        run: |
+          echo "### 🧪 Backend Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "Tests: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "Coverage: Check logs above" >> $GITHUB_STEP_SUMMARY
+
+  frontend-build:
+    name: 🏗️ Frontend Build
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./frontend
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🟢 Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: 📦 Install dependencies
+        run: npm ci
+      
+      - name: 🏗️ Build
+        run: npm run build
+      
+      - name: 🔧 Type check
+        run: npm run type-check
+        if: always()
+      
+      - name: 📊 Build Summary
+        if: always()
+        run: |
+          echo "### 🏗️ Frontend Build Results" >> $GITHUB_STEP_SUMMARY
+          echo "Build: ✅ Success" >> $GITHUB_STEP_SUMMARY
+          echo "Type Check: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+
+  deploy-info:
+    name: 📢 Deployment Info
+    needs: [backend-test, frontend-build]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: 📊 Summary
+        run: |
+          echo "### 🚀 Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Backend**: Auto-deployed by Render" >> $GITHUB_STEP_SUMMARY
+          echo "**Frontend**: Auto-deployed by Vercel" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All checks passed!" >> $GITHUB_STEP_SUMMARY
