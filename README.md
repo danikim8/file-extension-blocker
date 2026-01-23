@@ -6,8 +6,8 @@
 <h3 align="center">위험한 파일 확장자를 차단하여 보안을 강화하는 웹 애플리케이션</h3>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Tests-27%20passed-brightgreen?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Coverage-85%25-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Tests-38%20passed-brightgreen?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Coverage-88%25-blue?style=for-the-badge" />
   <img src="https://img.shields.io/badge/CI%2FCD-Passing-success?style=for-the-badge" />
 </p>
 
@@ -19,54 +19,105 @@
 
 ---
 
+## 📋 과제 요구사항 체크리스트
+
+### ✅ 필수 기능 구현 (100%)
+
+<table>
+<tr>
+<td width="50%">
+
+**🔒 고정 확장자 관리**
+- ✅ 7개 고정 확장자 (`bat`, `cmd`, `com`, `cpl`, `exe`, `scr`, `js`)
+- ✅ 체크박스 개별 차단 설정
+- ✅ 일괄 저장 기능
+- ✅ 사용자별 설정 저장
+
+**➕ 커스텀 확장자 관리**
+- ✅ 최대 200개 추가
+- ✅ 영문 소문자/숫자/언더스코어 허용
+- ✅ 최대 20자 제한
+- ✅ 중복 체크 (대소문자 무관)
+- ✅ 개별 삭제 기능
+
+</td>
+<td width="50%">
+
+**📤 파일 업로드 차단 테스트**
+- ✅ 파일 업로드 기능
+- ✅ 확장자 자동 추출
+- ✅ 차단 목록 비교
+- ✅ 차단/허용 결과 표시
+
+**👤 사용자 관리**
+- ✅ LocalStorage 기반 ID 생성
+- ✅ 사용자별 독립 설정
+
+</td>
+</tr>
+</table>
+
+### ✅ 기술 스택 요구사항 (100%)
+
+| 구분 | 요구사항 | 적용 기술 | 상태 |
+|------|----------|----------|------|
+| **Backend** | Node.js + Express | Node.js 22 + Express 5.2.1 | ✅ |
+| | TypeScript | TypeScript 5.9.3 | ✅ |
+| | PostgreSQL | Supabase | ✅ |
+| | ORM | Prisma 7.2.0 | ✅ |
+| | API 문서화 | Swagger/OpenAPI 3.0 | ✅ |
+| **Frontend** | React | React 19.2.0 | ✅ |
+| | TypeScript | TypeScript 5.9 | ✅ |
+| | UI 라이브러리 | Tailwind CSS 3.4.19 | ✅ |
+| | 폼 관리 | React Hook Form 7.71.1 | ✅ |
+
+### ✅ 테스트 요구사항 (100%)
+
+- ✅ **Unit Test**: 13개 (validator, errorHandler)
+- ✅ **Integration Test**: 25개 (API 엔드포인트)
+- ✅ **총 38개 테스트 통과** (100%)
+- ✅ **Jest + Supertest** 사용
+- ✅ **커버리지 88%+**
+
+### ✅ 배포 요구사항 (100%)
+
+- ✅ Frontend: [Vercel](https://blocker-dani.vercel.app)
+- ✅ Backend: [Render](https://file-extension-blocker-pf9s.onrender.com)
+- ✅ Database: Supabase (PostgreSQL)
+- ✅ API 문서: [Swagger UI](https://file-extension-blocker-pf9s.onrender.com/api-docs)
+
+### 🎁 추가 구현 (보너스)
+
+- ✅ **CI/CD**: GitHub Actions (테스트 자동화)
+- ✅ **테스트**: Jest + Supertest (38개 테스트, 88% 커버리지)
+- ✅ **API 문서화**: Swagger/OpenAPI 3.0
+- ✅ **대소문자 무관 중복 체크**
+- ✅ **입력값 정규화** (공백/점 제거)
+- ✅ **Prisma 7 Adapter 패턴** 최신 기술
+- ✅ **드래그 앤 드롭 UI**
+- ✅ **토스트 알림** (Sonner)
+- ✅ **Prisma Singleton 패턴**
+- ✅ **트러블슈팅 문서화**
+
+---
+
 ## 목차
 
-1. [프로젝트 소개](#1-프로젝트-소개)
-2. [주요 기능](#2-주요-기능)
-3. [기술 스택](#3-기술-스택)
-4. [시작하기](#4-시작하기)
-5. [API 엔드포인트](#5-api-엔드포인트)
-6. [테스트](#6-테스트)
-7. [CI/CD](#7-cicd)
-8. [트러블슈팅](#8-트러블슈팅)
-9. [폴더 구조](#9-폴더-구조)
+1. [기술 스택](#1-기술-스택)
+2. [시작하기](#2-시작하기)
+3. [API 엔드포인트](#3-api-엔드포인트)
+4. [테스트](#4-테스트)
+5. [CI/CD](#5-cicd)
+6. [트러블슈팅](#6-트러블슈팅)
+7. [폴더 구조](#7-폴더-구조)
 
 ---
 
-## 1. 프로젝트 소개
-
-**파일 확장자 차단 앱**은 위험한 파일 확장자를 관리하고 차단하여 시스템 보안을 강화하는 웹 애플리케이션입니다.
-
-사용자별로 독립적인 확장자 설정을 관리하며, 실시간 파일 검증 기능을 제공합니다.
-
----
-
-## 2. 주요 기능
-
-### 🔒 고정 확장자 관리
-- 7개의 위험한 고정 확장자 제공: `bat`, `cmd`, `com`, `cpl`, `exe`, `scr`, `js`
-- 체크박스로 개별 차단 설정 및 일괄 저장
-
-### ➕ 커스텀 확장자 관리
-- 최대 200개까지 사용자 정의 확장자 추가 가능
-- 실시간 입력 검증 (영문 소문자, 숫자, 언더스코어만 허용, 최대 20자)
-- 대소문자 무관 중복 체크
-
-### 📤 파일 업로드 테스트
-- 드래그 앤 드롭 지원
-- 차단 목록과 실시간 비교 후 토스트 알림
-
-### 👤 사용자 관리
-- LocalStorage 기반 사용자 ID 자동 생성
-- 사용자별 독립적인 확장자 설정
-
----
-
-## 3. 기술 스택
+## 1. 기술 스택
 
 ### Frontend
 ![React](https://img.shields.io/badge/React-19.2.0-61DAFB?style=for-the-badge&logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-7.2.4-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-3.4.19-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
@@ -85,7 +136,7 @@
 
 ---
 
-## 4. 시작하기
+## 2. 시작하기
 
 ### 사전 요구사항
 - Node.js 22 이상
@@ -116,7 +167,7 @@ npm run dev
 
 ---
 
-## 5. API 엔드포인트
+## 3. API 엔드포인트
 
 ### Base URL
 - **프로덕션**: `https://file-extension-blocker-pf9s.onrender.com`
@@ -137,15 +188,16 @@ npm run dev
 
 ---
 
-## 6. 테스트
+## 4. 테스트
 
-### ✅ 27개 테스트 전체 통과 (100%)
+### ✅ 38개 테스트 전체 통과 (100%)
 
-#### Unit Tests (9개)
+#### Unit Tests (13개)
 - `normalizeExtension`: 공백/점 제거, 소문자 변환
 - `validateExtension`: 형식/길이/경계값 검증
+- `errorHandler`: 에러 핸들링 미들웨어
 
-#### Integration Tests (18개)
+#### Integration Tests (25개)
 - 고정 확장자 조회/저장
 - 커스텀 확장자 CRUD
 - 대소문자 무관 중복 체크
@@ -158,19 +210,19 @@ npm run dev
 cd backend
 
 npm test              # 전체 테스트
-npm run test:coverage # 커버리지 (85%+)
+npm run test:coverage # 커버리지 (88%+)
 npm run type-check    # 타입 체크
 ```
 
 ---
 
-## 7. CI/CD
+## 5. CI/CD
 
 ### GitHub Actions
 
 **main 브랜치 푸시 시 자동 실행:**
 
-- ✅ Backend: Jest 테스트 27개 + TypeScript 타입 체크
+- ✅ Backend: Jest 테스트 38개 + TypeScript 타입 체크
 - ✅ Frontend: 프로덕션 빌드 + TypeScript 타입 체크
 
 ### 배포 프로세스
@@ -188,7 +240,7 @@ npm run type-check    # 타입 체크
 
 ---
 
-## 8. 트러블슈팅
+## 6. 트러블슈팅
 
 <details>
 <summary><strong>Prisma 7 Adapter 마이그레이션</strong></summary>
@@ -269,64 +321,29 @@ const existing = await prisma.customExtension.findFirst({
 여러 파일에서 `new PrismaClient()`를 각각 생성하여 연결 풀 낭비 및 테스트 시 모킹 어려움
 
 ### Solution
-**1. Singleton 패턴으로 Prisma Client 중앙 관리**
 ```typescript
 // backend/src/config/prisma.ts
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
-import dotenv from 'dotenv';
 
-dotenv.config();
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
-
-const prisma = new PrismaClient({
-  adapter,
-  log: ['error', 'warn'],
-});
+const prisma = new PrismaClient({ adapter });
 
 export default prisma;
 ```
 
-**2. 모든 라우트에서 동일한 인스턴스 사용**
-```typescript
-// backend/src/routes/extensions.ts
-import prisma from '../config/prisma';
-
-// 여러 엔드포인트에서 동일한 prisma 인스턴스 사용
-router.get('/fixed', async (req, res) => {
-  const extensions = await prisma.fixedExtension.findMany({...});
-});
-```
-
-**3. 테스트에서 모킹 용이**
-```typescript
-// backend/src/routes/__tests__/extensions.test.ts
-import prisma from '../../config/prisma';
-
-jest.mock('../../config/prisma', () => ({
-  __esModule: true,
-  default: mockDeep<PrismaClient>(),
-}));
-
-const mockedPrisma = prisma as unknown as DeepMockProxy<PrismaClient>;
-```
-
 ### Result
 ✅ 단일 Prisma Client 인스턴스로 연결 풀 효율적 관리  
-✅ 테스트에서 `jest-mock-extended`로 쉽게 모킹 가능  
-✅ 코드 중복 제거 및 유지보수성 향상  
-✅ 실제 DB 없이 테스트 가능
+✅ 테스트에서 쉽게 모킹 가능  
+✅ 코드 중복 제거
 
 </details>
 
 ---
 
-## 9. 폴더 구조
+## 7. 폴더 구조
 
 ```bash
 file-extension-blocker/
@@ -335,10 +352,10 @@ file-extension-blocker/
 │   │   ├── 📁 components/      # React 컴포넌트
 │   │   ├── 📁 hooks/           # Custom Hooks
 │   │   ├── 📁 services/        # API 서비스
-│   │   ├── 📁 types/            # TypeScript 타입
-│   │   ├── 📁 utils/            # 유틸리티
+│   │   ├── 📁 types/           # TypeScript 타입
+│   │   ├── 📁 utils/           # 유틸리티
 │   │   └── App.tsx
-│   └── 📁 public/               # 정적 파일
+│   └── 📁 public/              # 정적 파일
 │
 ├── 📁 backend/
 │   ├── 📁 src/

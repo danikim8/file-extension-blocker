@@ -74,6 +74,20 @@ describe('GET /api/extensions/fixed', () => {
     expect(response.body.success).toBe(false)
     expect(response.body.error).toBe('userId is required')
   })
+
+  test('500: 데이터베이스 에러', async () => {
+    mockedPrisma.fixedExtension.findMany.mockRejectedValue(
+      new Error('Database connection failed')
+    )
+
+    const response = await request(app)
+      .get('/api/extensions/fixed')
+      .query({ userId: TEST_USER_ID })
+
+    expect(response.status).toBe(500)
+    expect(response.body.success).toBe(false)
+    expect(response.body.error).toBe('Database connection failed')
+  })
 })
 
 describe('PUT /api/extensions/fixed', () => {
@@ -133,6 +147,23 @@ describe('PUT /api/extensions/fixed', () => {
     expect(response.body.success).toBe(false)
     expect(response.body.error).toBe('extensions array is required')
   })
+
+  test('500: 데이터베이스 에러', async () => {
+    mockedPrisma.fixedExtension.upsert.mockRejectedValue(
+      new Error('Database connection failed')
+    )
+
+    const response = await request(app)
+      .put('/api/extensions/fixed')
+      .send({
+        userId: TEST_USER_ID,
+        extensions: [{ name: 'exe', isBlocked: true }],
+      })
+
+    expect(response.status).toBe(500)
+    expect(response.body.success).toBe(false)
+    expect(response.body.error).toBe('Database connection failed')
+  })
 })
 
 describe('GET /api/extensions/custom', () => {
@@ -170,6 +201,20 @@ describe('GET /api/extensions/custom', () => {
     expect(response.status).toBe(400)
     expect(response.body.success).toBe(false)
     expect(response.body.error).toBe('userId is required')
+  })
+
+  test('500: 데이터베이스 에러', async () => {
+    mockedPrisma.customExtension.findMany.mockRejectedValue(
+      new Error('Database connection failed')
+    )
+
+    const response = await request(app)
+      .get('/api/extensions/custom')
+      .query({ userId: TEST_USER_ID })
+
+    expect(response.status).toBe(500)
+    expect(response.body.success).toBe(false)
+    expect(response.body.error).toBe('Database connection failed')
   })
 })
 
@@ -313,6 +358,42 @@ describe('POST /api/extensions/custom', () => {
     expect(response.body.error).toBe('이미 존재하는 확장자입니다')
   })
 
+  test('500: 데이터베이스 에러 (create)', async () => {
+    mockedPrisma.customExtension.count.mockResolvedValue(0)
+    mockedPrisma.customExtension.findFirst.mockResolvedValue(null)
+    mockedPrisma.customExtension.create.mockRejectedValue(
+      new Error('Database connection failed')
+    )
+
+    const response = await request(app)
+      .post('/api/extensions/custom')
+      .send({
+        userId: TEST_USER_ID,
+        name: 'zip',
+      })
+
+    expect(response.status).toBe(500)
+    expect(response.body.success).toBe(false)
+    expect(response.body.error).toBe('Database connection failed')
+  })
+
+  test('500: 데이터베이스 에러 (count)', async () => {
+    mockedPrisma.customExtension.count.mockRejectedValue(
+      new Error('Database connection failed')
+    )
+
+    const response = await request(app)
+      .post('/api/extensions/custom')
+      .send({
+        userId: TEST_USER_ID,
+        name: 'zip',
+      })
+
+    expect(response.status).toBe(500)
+    expect(response.body.success).toBe(false)
+    expect(response.body.error).toBe('Database connection failed')
+  })
+
   afterEach(() => {
     jest.restoreAllMocks()
   })
@@ -369,5 +450,39 @@ describe('DELETE /api/extensions/custom/:id', () => {
     expect(response.status).toBe(200)
     expect(response.body.success).toBe(true)
     expect(response.body.message).toBe('Deleted')
+  })
+
+  test('500: 데이터베이스 에러 (findFirst)', async () => {
+    mockedPrisma.customExtension.findFirst.mockRejectedValue(
+      new Error('Database connection failed')
+    )
+
+    const response = await request(app)
+      .delete('/api/extensions/custom/test-id')
+      .query({ userId: TEST_USER_ID })
+
+    expect(response.status).toBe(500)
+    expect(response.body.success).toBe(false)
+    expect(response.body.error).toBe('Database connection failed')
+  })
+
+  test('500: 데이터베이스 에러 (delete)', async () => {
+    mockedPrisma.customExtension.findFirst.mockResolvedValue({
+      id: 'test-id',
+      userId: TEST_USER_ID,
+      name: 'zip',
+      createdAt: new Date(),
+    })
+    mockedPrisma.customExtension.delete.mockRejectedValue(
+      new Error('Database connection failed')
+    )
+
+    const response = await request(app)
+      .delete('/api/extensions/custom/test-id')
+      .query({ userId: TEST_USER_ID })
+
+    expect(response.status).toBe(500)
+    expect(response.body.success).toBe(false)
+    expect(response.body.error).toBe('Database connection failed')
   })
 })
