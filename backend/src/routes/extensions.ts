@@ -1,28 +1,40 @@
 import { Router, type Request, type Response } from 'express'
-import { PrismaClient } from '@prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
-import { Pool } from 'pg'
 import { normalizeExtension, validateExtension } from '../utils/validator'
-import dotenv from 'dotenv'
-
-// 환경변수 로드 (Prisma Client 생성 전에 필요)
-dotenv.config()
+import prisma from '../config/prisma'
 
 const router = Router()
-
-// Prisma 7: engine type \"client\" 사용 시 adapter 필요
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-})
-const adapter = new PrismaPg(pool)
-
-const prisma = new PrismaClient({
-  adapter,
-  log: ['error', 'warn'],
-})
 const USER_ID = 'user_1'
 
-// GET /fixed - 고정 확장자 조회
+/**
+ * @swagger
+ * /api/extensions/fixed:
+ *   get:
+ *     summary: 고정 확장자 조회
+ *     tags: [Extensions]
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 사용자 ID
+ *     responses:
+ *       200:
+ *         description: 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/FixedExtension'
+ *       400:
+ *         description: userId 필수
+ */
 router.get('/fixed', async (req: Request, res: Response, next) => {
   try {
     const { userId } = req.query
@@ -51,7 +63,35 @@ router.get('/fixed', async (req: Request, res: Response, next) => {
   }
 })
 
-// PUT /fixed - 고정 확장자 일괄 업데이트
+/**
+ * @swagger
+ * /api/extensions/fixed:
+ *   put:
+ *     summary: 고정 확장자 일괄 저장
+ *     tags: [Extensions]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - extensions
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 example: user_1
+ *               extensions:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/FixedExtension'
+ *     responses:
+ *       200:
+ *         description: 성공
+ *       400:
+ *         description: 잘못된 요청
+ */
 router.put('/fixed', async (req: Request, res: Response, next) => {
   try {
     console.log('🔵 PUT /fixed')
@@ -108,7 +148,36 @@ router.put('/fixed', async (req: Request, res: Response, next) => {
   }
 })
 
-// GET /custom - 커스텀 확장자 조회
+/**
+ * @swagger
+ * /api/extensions/custom:
+ *   get:
+ *     summary: 커스텀 확장자 조회
+ *     tags: [Extensions]
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 사용자 ID
+ *     responses:
+ *       200:
+ *         description: 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/CustomExtension'
+ *       400:
+ *         description: userId 필수
+ */
 router.get('/custom', async (req: Request, res: Response, next) => {
   try {
     const { userId } = req.query
@@ -134,7 +203,43 @@ router.get('/custom', async (req: Request, res: Response, next) => {
   }
 })
 
-// POST /custom - 커스텀 확장자 추가
+/**
+ * @swagger
+ * /api/extensions/custom:
+ *   post:
+ *     summary: 커스텀 확장자 추가
+ *     tags: [Extensions]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - name
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 example: user_1
+ *               name:
+ *                 type: string
+ *                 example: zip
+ *     responses:
+ *       201:
+ *         description: 생성 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/CustomExtension'
+ *       400:
+ *         description: 잘못된 요청 (중복, 형식 오류, 200개 초과)
+ */
 router.post('/custom', async (req: Request, res: Response, next) => {
   try {
     const { userId, name } = req.body
@@ -197,7 +302,7 @@ router.post('/custom', async (req: Request, res: Response, next) => {
       },
     })
 
-    res.json({
+    res.status(201).json({
       success: true,
       data: extension,
     })
@@ -206,7 +311,33 @@ router.post('/custom', async (req: Request, res: Response, next) => {
   }
 })
 
-// DELETE /custom/:id - 커스텀 확장자 삭제
+/**
+ * @swagger
+ * /api/extensions/custom/{id}:
+ *   delete:
+ *     summary: 커스텀 확장자 삭제
+ *     tags: [Extensions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 확장자 ID
+ *       - in: query
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 사용자 ID
+ *     responses:
+ *       200:
+ *         description: 성공
+ *       404:
+ *         description: 확장자를 찾을 수 없음
+ *       400:
+ *         description: userId 필수
+ */
 router.delete('/custom/:id', async (req: Request, res: Response, next) => {
   try {
     const id = String(req.params.id)

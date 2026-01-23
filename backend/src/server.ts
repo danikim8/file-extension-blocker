@@ -1,8 +1,10 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import swaggerUi from 'swagger-ui-express'
 import extensionsRouter from './routes/extensions'
 import { errorHandler } from './middleware/errorHandler'
+import { swaggerSpec } from './config/swagger'
 
 dotenv.config()
 
@@ -35,7 +37,30 @@ app.use(cors({
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-// Health check for Render
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: 서버 상태 확인
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: 서버 정상
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ok
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *                 uptime:
+ *                   type: number
+ *                   example: 123.456
+ */
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok', 
@@ -43,6 +68,9 @@ app.get('/health', (req, res) => {
     uptime: process.uptime()
   })
 })
+
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 // 라우트 마운트
 app.use('/api/extensions', extensionsRouter)
