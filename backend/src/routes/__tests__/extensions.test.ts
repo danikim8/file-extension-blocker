@@ -315,7 +315,7 @@ describe('POST /api/extensions/custom', () => {
     expect(response.body.error).toContain('200개')
   })
 
-  test('400: 중복 확장자', async () => {
+  test('409: 중복 확장자', async () => {
     mockedPrisma.customExtension.count.mockResolvedValue(0)
     mockedPrisma.customExtension.findFirst.mockResolvedValue({
       id: 'existing-id',
@@ -331,12 +331,12 @@ describe('POST /api/extensions/custom', () => {
         name: 'zip',
       })
 
-    expect(response.status).toBe(400)
+    expect(response.status).toBe(409)
     expect(response.body.success).toBe(false)
     expect(response.body.error).toBe('이미 존재하는 확장자입니다')
   })
 
-  test('400: 대소문자 무관 중복', async () => {
+  test('409: 대소문자 무관 중복', async () => {
     // 'zip' 추가 후 'ZIP' 시도
     mockedPrisma.customExtension.count.mockResolvedValue(0)
     mockedPrisma.customExtension.findFirst.mockResolvedValue({
@@ -353,7 +353,7 @@ describe('POST /api/extensions/custom', () => {
         name: 'ZIP', // 대문자로 시도
       })
 
-    expect(response.status).toBe(400)
+    expect(response.status).toBe(409)
     expect(response.body.success).toBe(false)
     expect(response.body.error).toBe('이미 존재하는 확장자입니다')
   })

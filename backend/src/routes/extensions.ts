@@ -238,7 +238,9 @@ router.get('/custom', async (req: Request, res: Response, next) => {
  *                 data:
  *                   $ref: '#/components/schemas/CustomExtension'
  *       400:
- *         description: 잘못된 요청 (중복, 형식 오류, 200개 초과)
+ *         description: 잘못된 요청 (형식 오류, 200개 초과)
+ *       409:
+ *         description: 중복된 확장자
  */
 router.post('/custom', async (req: Request, res: Response, next) => {
   try {
@@ -289,7 +291,7 @@ router.post('/custom', async (req: Request, res: Response, next) => {
     })
 
     if (existing) {
-      return res.status(400).json({
+      return res.status(409).json({
         success: false,
         error: '이미 존재하는 확장자입니다',
       })
