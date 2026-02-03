@@ -2,19 +2,30 @@ name: Keep Render Service Alive
 
 on:
   schedule:
-    # 5분마다 실행 (UTC 기준)
-    - cron: '*/5 * * * *'
+    # 10분마다 실행 (GitHub Actions 지연 고려)
+    - cron: '*/10 * * * *'
   workflow_dispatch: # 수동 실행도 가능
 
 jobs:
   ping:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
-    continue-on-error: true
+    timeout-minutes: 3
     steps:
       - name: Ping Health Endpoint
-        timeout-minutes: 1
+        continue-on-error: true
         run: |
-          curl -f --max-time 10 https://file-extension-blocker-pf9s.onrender.com/health || echo "Ping failed"
-      - name: Log Success
-        run: echo "Service pinged successfully"
+          echo "🔔 Pinging backend at $(date)"
+          response=$(curl -s -w "\n%{http_code}" --max-time 30 https://file-extension-blocker-pf9s.onrender.com/health)
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+          
+          if [ "$http_code" = "200" ]; then
+            echo "✅ Success: $body"
+          else
+            echo "⚠️ Failed with HTTP $http_code"
+            exit 1
+          fi
+      
+      - name: Log Result
+        if: always()
+        run: echo "Ping attempt completed at $(date)"
