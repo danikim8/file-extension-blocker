@@ -9,6 +9,7 @@ jobs:
   backend-test:
     name: 🧪 Backend Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     
     defaults:
       run:
@@ -45,6 +46,7 @@ jobs:
   frontend-build:
     name: 🏗️ Frontend Build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     
     defaults:
       run:
@@ -82,6 +84,7 @@ jobs:
     name: 📢 Deployment Info
     needs: [backend-test, frontend-build]
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     if: always()
     
     steps:
