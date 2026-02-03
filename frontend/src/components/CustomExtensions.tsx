@@ -1,9 +1,13 @@
-import { useState } from 'react'
+import { useMemo } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { X, Plus } from 'lucide-react'
 import type { CustomExtension } from '../types/extension'
+import { createExtensionSchema, type ExtensionInput } from '../schemas/extension'
 
 interface Props {
   extensions: CustomExtension[]
+  allExtensionNames: string[] // ✅ 모든 확장자 이름 (중복 체크용)
   onAdd: (name: string) => void
   onDelete: (id: string) => void
   isLoading?: boolean
@@ -12,47 +16,60 @@ interface Props {
 
 export function CustomExtensions({
   extensions,
+  allExtensionNames,
   onAdd,
   onDelete,
   isLoading,
   maxCount = 200,
 }: Props) {
-  const [inputValue, setInputValue] = useState('')
+  // ✅ Zod 스키마 동적 생성 (중복 체크 포함)
+  const schema = useMemo(
+    () => createExtensionSchema(allExtensionNames),
+    [allExtensionNames]
+  )
 
-  const handleAdd = () => {
-    const trimmed = inputValue.trim()
-    if (!trimmed) return
-    
-    // 검증은 부모 컴포넌트(App.tsx)에서 처리
-    onAdd(trimmed)
-    setInputValue('')
-  }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ExtensionInput>({
+    resolver: zodResolver(schema),
+    mode: 'onSubmit', // 제출 시 검증
+  })
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleAdd()
-    }
+  const onSubmit = (data: ExtensionInput) => {
+    // 이미 Zod에서 정규화 및 검증 완료됨
+    onAdd(data.name)
+    reset()
   }
 
   return (
     <div className="space-y-5">
       {/* 입력 영역 */}
-      <div className="flex gap-3">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="확장자 입력 (예: zip, rar)"
-          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          disabled={isLoading}
-        />
+      <form onSubmit={handleSubmit(onSubmit)} className="flex gap-3">
+        <div className="flex-1 relative">
+          <input
+            type="text"
+            {...register('name')}
+            placeholder="확장자 입력 (예: zip, rar)"
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+              errors.name ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+            }`}
+            disabled={isLoading || isSubmitting}
+          />
+          {errors.name && (
+            <p className="absolute -bottom-6 left-1 text-xs text-red-500 font-medium">
+              {errors.name.message}
+            </p>
+          )}
+        </div>
         <button
-          onClick={handleAdd}
-          disabled={isLoading || !inputValue.trim()}
-          className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          type="submit"
+          disabled={isLoading || isSubmitting}
+          className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 h-[50px]"
         >
-          {isLoading ? (
+          {isLoading || isSubmitting ? (
             '추가 중...'
           ) : (
             <>
@@ -61,10 +78,10 @@ export function CustomExtensions({
             </>
           )}
         </button>
-      </div>
+      </form>
 
       {/* 등록된 확장자 섹션 */}
-      <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+      <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 mt-2">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-700">등록된 확장자</h3>
           <span className="text-2xl font-bold text-purple-600">
@@ -89,6 +106,7 @@ export function CustomExtensions({
               >
                 <span className="text-sm">{ext.name}</span>
                 <button
+                  type="button"
                   onClick={() => onDelete(ext.id)}
                   disabled={isLoading}
                   className="hover:bg-purple-200 rounded-full p-0.5 transition-colors disabled:opacity-50 flex items-center justify-center"

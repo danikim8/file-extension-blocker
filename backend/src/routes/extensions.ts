@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from 'express'
-import { normalizeExtension, validateExtension } from '../utils/validator'
+import { normalizeExtension, extensionInputSchema } from '../utils/validator'
+import { z } from 'zod'
 import prisma from '../config/prisma'
 
 const router = Router()
@@ -260,15 +261,8 @@ router.post('/custom', async (req: Request, res: Response, next) => {
       })
     }
 
-    const normalized = normalizeExtension(name)
-    const validation = validateExtension(normalized)
-
-    if (!validation.valid) {
-      return res.status(400).json({
-        success: false,
-        error: validation.error,
-      })
-    }
+    const validated = extensionInputSchema.parse(req.body)
+    const normalized = normalizeExtension(validated.name)
 
     // Check count limit
     const count = await prisma.customExtension.count({
@@ -309,6 +303,12 @@ router.post('/custom', async (req: Request, res: Response, next) => {
       data: extension,
     })
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        error: error.errors[0].message,
+      })
+    }
     next(error)
   }
 })

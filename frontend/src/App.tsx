@@ -4,7 +4,9 @@ import { CustomExtensions } from './components/CustomExtensions'
 import type { TestResult } from './types/extension'
 import { Toaster, toast } from 'sonner'
 import { useExtensions } from './hooks/useExtensions'
-import { normalizeExtension, validateExtension } from './utils/extensionValidator'
+
+
+import { normalizeExtension } from './utils/extensionValidator'
 
 function App() {
   // useExtensions 훅에서 상태와 함수 가져오기
@@ -35,23 +37,8 @@ function App() {
   }
 
   const handleAddCustom = async (name: string) => {
-    // 정규화
-    const normalized = normalizeExtension(name)
-    
-    // 검증
-    const existingNames = [
-      ...fixedExtensions.map(ext => ext.name),
-      ...customExtensions.map(ext => ext.name),
-    ]
-    const error = validateExtension(normalized, existingNames, customExtensions.length)
-    
-    if (error) {
-      toast.error(error)
-      return
-    }
-    
-    // 추가
-    await addCustomExtension(normalized)
+    // 폼에서 이미 검증/정규화 완료됨
+    await addCustomExtension(name)
   }
 
   const handleDeleteCustom = async (id: string) => {
@@ -68,7 +55,8 @@ function App() {
 
     const results: TestResult[] = files.map(file => {
       const fileName = file.name
-      const ext = fileName.split('.').pop()?.toLowerCase() || ''
+      const fileExt = fileName.split('.').pop() || ''
+      const ext = normalizeExtension(fileExt)
       const isBlocked = ext ? blockedList.includes(ext) : false
 
       if (isBlocked) {
@@ -154,6 +142,10 @@ function App() {
           </h2>
           <CustomExtensions
             extensions={customExtensions}
+            allExtensionNames={[
+              ...fixedExtensions.map((e) => e.name),
+              ...customExtensions.map((e) => e.name),
+            ]}
             onAdd={handleAddCustom}
             onDelete={handleDeleteCustom}
             isLoading={isAddingCustom}
