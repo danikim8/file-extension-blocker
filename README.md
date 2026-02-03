@@ -69,7 +69,7 @@
 | **Frontend** | React | React 19.2.0 |
 | | TypeScript | TypeScript 5.9 |
 | | UI 라이브러리 | Tailwind CSS 3.4.19 |
-| | 폼 관리 | React Hook Form 7.71.1 |
+| | 폼 관리 | React useState (Controlled) |
 
 ### ✅ 테스트 요구사항 (100%)
 
