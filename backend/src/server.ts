@@ -11,9 +11,12 @@ dotenv.config()
 const app = express()
 
 // 미들웨어 설정
-const allowedOrigins = process.env.CORS_ORIGIN 
-  ? process.env.CORS_ORIGIN.split(',')
-  : ['http://localhost:5173'];
+const allowedOrigins = [
+  'http://localhost:5173', 
+  'http://127.0.0.1:5173',
+  ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : []),
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
+];
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -27,6 +30,7 @@ app.use(cors({
     )) {
       callback(null, true);
     } else {
+      console.log('🚫 Blocked by CORS:', origin); // 디버깅용 로그
       callback(new Error('Not allowed by CORS'));
     }
   },

@@ -194,11 +194,11 @@ npm run dev
 
 ## 4. 테스트
 
-### ✅ 38개 테스트 전체 통과 (100%)
+### ✅ 39개 테스트 전체 통과 (100%)
 
-#### Unit Tests (13개)
+#### Unit Tests (14개)
 - `normalizeExtension`: 공백/점 제거, 소문자 변환
-- `validateExtension`: 형식/길이/경계값 검증
+- `Zod Schema Validation`: 입력값 형식, 길이, 특수문자 검증 (Zod)
 - `errorHandler`: 에러 핸들링 미들웨어
 
 #### Integration Tests (25개)
@@ -342,6 +342,41 @@ export default prisma;
 ✅ 단일 Prisma Client 인스턴스로 연결 풀 효율적 관리  
 ✅ 테스트에서 쉽게 모킹 가능  
 ✅ 코드 중복 제거
+
+</details>
+
+<details>
+<summary><strong>Validation 로직 리팩토링 (Zod 도입)</strong></summary>
+
+### Problem
+- 프론트엔드와 백엔드의 검증 로직이 분리되어 있어 유지보수가 어렵고 버그 발생 위험 존재
+- `if-else` 기반의 수동 검증 코드로 인한 가독성 저하
+- `file.PDF`와 같은 대소문자 혼용 입력이나 `..zip` 같은 특수 케이스 처리 미흡
+
+### Solution
+**Zod 스키마 도입 및 중앙화**
+```typescript
+// 공통 검증 로직 (Zod)
+export const extensionInputSchema = z.object({
+  name: z.string()
+    .trim()
+    .transform((val) => val.toLowerCase()) // 자동 소문자 변환
+    .pipe(z.string().regex(/^[a-z0-9_]+$/))
+});
+```
+
+**React Hook Form 통합**
+```typescript
+const { register, handleSubmit } = useForm({
+  resolver: zodResolver(schema) // Zod 스키마 연결
+});
+```
+
+### Result
+✅ **코드량 40% 감소**: 복잡한 수동 검증 로직 제거  
+✅ **안전성 강화**: 프론트/백엔드 검증 규칙 통일  
+✅ **UX 개선**: `PDF` → `pdf` 자동 변환 및 실시간 에러 피드백  
+✅ **성능 최적화**: 비제어 컴포넌트(`React Hook Form`) 전환으로 리렌더링 최소화
 
 </details>
 
