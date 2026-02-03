@@ -284,7 +284,7 @@ describe('POST /api/extensions/custom', () => {
 
     expect(response.status).toBe(400)
     expect(response.body.success).toBe(false)
-    expect(response.body.error).toContain('영문 소문자')
+    expect(response.body.error).toContain('영문, 숫자')
   })
 
   test('400: 길이 초과', async () => {
